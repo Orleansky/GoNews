@@ -53,7 +53,7 @@ func (s *Store) Posts() ([]storage.Post, error) {
 	var posts []storage.Post
 	for cur.Next(context.Background()) {
 		var p storage.Post
-		err := cur.Decode(p)
+		err := cur.Decode(&p)
 		if err != nil {
 			return nil, err
 		}
@@ -93,9 +93,23 @@ func (s *Store) AddPost(post storage.Post) error {
 
 func (s *Store) UpdatePost(post storage.Post) error {
 	collection := s.db.Database("posts").Collection("posts")
-	filter := bson.D{{Key: "_id", Value: post.ID}}
 
-	_, err := collection.UpdateByID(context.Background(), filter, post)
+	authors := s.db.Database("posts").Collection("authors")
+	authorsFilter := bson.D{{Key: "_id", Value: post.AuthorID}}
+
+	res := authors.FindOne(context.Background(), authorsFilter)
+	log.Println(res)
+	var author Authors
+	err := res.Decode(&author)
+	if err != nil {
+		return err
+	}
+	post.AuthorName = author.Name
+
+	filter := bson.D{{Key: "_id", Value: post.ID}}
+	update := bson.D{{Key: "$set", Value: post}}
+
+	_, err = collection.UpdateOne(context.Background(), filter, update)
 	if err != nil {
 		return err
 	}
@@ -104,7 +118,7 @@ func (s *Store) UpdatePost(post storage.Post) error {
 
 func (s *Store) DeletePost(post storage.Post) error {
 	collection := s.db.Database("posts").Collection("posts")
-	filter := bson.D{{Key: "id", Value: post.ID}}
+	filter := bson.D{{Key: "_id", Value: post.ID}}
 	_, err := collection.DeleteOne(context.Background(), filter)
 	if err != nil {
 		return err
