@@ -37,10 +37,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, _ = db, db2
+	_, _ = db2, db3
 
 	// Инициализируем хранилище сервера конкретной БД.
-	srv.db = db3
+	srv.db = db
 
 	// Создаём объект API и регистрируем обработчики.
 	srv.api = api.New(srv.db)

@@ -14,4 +14,5 @@ CREATE TABLE posts (
 );
 
 INSERT INTO authors (id, name) VALUES (0, 'Дмитрий');
+INSERT INTO authors (id, name) VALUES (1, 'Мария');
 INSERT INTO posts (id, author_id, title, content, created_at) VALUES (0, 0, 'Статья', 'Содержание статьи', 0);
